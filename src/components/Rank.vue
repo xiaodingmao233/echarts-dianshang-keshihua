@@ -12,7 +12,10 @@ export default {
   data () {
     return {
       chartInstance: null,
-      allData: null
+      allData: null,
+      startValue: 0,
+      endValue: 9,
+      timerId: null
     }
   },
   computed: {},
@@ -21,6 +24,9 @@ export default {
   mounted () {
     this.initChart()
     this.getDate()
+  },
+  beforeDestroy () {
+    clearInterval(this.timerId)
   },
   methods: {
     initChart () {
@@ -54,6 +60,12 @@ export default {
         ]
       }
       this.chartInstance.setOption(initOption)
+      this.chartInstance.on('mouseover', () => {
+        clearInterval(this.timerId)
+      })
+      this.chartInstance.on('mouseout', () => {
+        this.startInterval()
+      })
     },
     async getDate () {
       const { data: res } = await this.$http.get('rank')
@@ -63,6 +75,7 @@ export default {
         return b.value - a.value
       })
       this.updateChart()
+      this.startInterval()
     },
     updateChart () {
       const colorArr = [
@@ -79,6 +92,11 @@ export default {
       const dateOption = {
         xAxis: {
           data: provinceArr
+        },
+        dataZoom: {
+          show: false,
+          startValue: this.startValue,
+          endValue: this.endValue
         },
         series: [
           {
@@ -110,7 +128,21 @@ export default {
       }
       this.chartInstance.setOption(dateOption)
     },
-    screenAdapter () {}
+    screenAdapter () {},
+    startInterval () {
+      if (this.timerId) {
+        clearInterval(this.timerId)
+      }
+      this.timerId = setInterval(() => {
+        this.startValue++,
+        this.endValue++
+        if (this.endValue > this.allData.length - 1) {
+          this.startValue = 0,
+          this.endValue = 9
+        }
+        this.updateChart()
+      }, 1000)
+    }
   }
 }
 </script>
