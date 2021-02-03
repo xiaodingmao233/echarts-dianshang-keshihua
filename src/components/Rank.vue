@@ -24,6 +24,7 @@ export default {
   mounted () {
     this.initChart()
     this.getDate()
+    window.addEventListener('resize', this.screenAdapter)
   },
   beforeDestroy () {
     clearInterval(this.timerId)
@@ -66,6 +67,7 @@ export default {
       this.chartInstance.on('mouseout', () => {
         this.startInterval()
       })
+      this.screenAdapter()
     },
     async getDate () {
       const { data: res } = await this.$http.get('rank')
@@ -128,7 +130,27 @@ export default {
       }
       this.chartInstance.setOption(dateOption)
     },
-    screenAdapter () {},
+    screenAdapter () {
+      const titleFontSize  = this.$refs.rank_ref.offsetWidth / 100 * 3.6
+      // console.log(titleFontSize)
+      const adapterOption = {
+        title: {
+          textStyle: {
+            fontSize: titleFontSize
+          }
+        },
+        series: [
+          {
+            barWidth: titleFontSize,
+            itemStyle: {
+              barBorderRadius: [titleFontSize / 2, titleFontSize / 2, 0, 0] //（顺时针左上，右上，右下，左下）
+            }
+          }
+        ]
+      }
+      this.chartInstance.setOption(adapterOption)
+      this.chartInstance.resize()
+    },
     startInterval () {
       if (this.timerId) {
         clearInterval(this.timerId)
