@@ -26,7 +26,7 @@ export default {
     this.getDate()
     window.addEventListener('resize', this.screenAdapter)
   },
-  beforeDestroy () {
+  destroyed () {
     clearInterval(this.timerId)
   },
   methods: {
