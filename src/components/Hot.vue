@@ -1,6 +1,9 @@
 <template>
  <div class="com-container">
    <div class="com-chart" ref="hot_ref"></div>
+   <span class="iconfont arr-left" @click="toLeft">&#xe6ef;</span>
+   <span class="iconfont arr-right" @click="toRight">&#xe6ed;</span>
+   <span class="cat-name">{{ catName }}</span>
  </div>
 </template>
 
@@ -12,10 +15,19 @@ export default {
   data () {
     return {
       chartInstance: null,
-      allData: null
+      allData: null,
+      currentIndex: 0
     }
   },
-  computed: {},
+  computed: {
+    catName () {
+      if (!this.allData) {
+        return ''
+      } else {
+        return this.allData[this.currentIndex].name
+      }
+    }
+  },
   watch: {},
   created () {},
   mounted () {
@@ -24,7 +36,7 @@ export default {
   },
   methods: {
     initChart () {
-      this.chartInstance = this.$echarts.init(this.$refs.hot_ref)
+      this.chartInstance = this.$echarts.init(this.$refs.hot_ref, 'chalk')
       const initOption = {
         series: [
           {
@@ -41,10 +53,10 @@ export default {
       this.updateChart()
     },
     updateChart () {
-      const legendData = this.allData[0].children.map(item => {
+      const legendData = this.allData[this.currentIndex].children.map(item => {
         return item.name
       })
-      const seriesData = this.allData[0].children.map(item => {
+      const seriesData = this.allData[this.currentIndex].children.map(item => {
         return {
           name: item.name,
           value: item.value
@@ -64,11 +76,45 @@ export default {
     },
     screenAdapter () {
 
+    },
+    toLeft () {
+      if (this.currentIndex === 0) {
+        this.currentIndex = this.allData.length - 1
+      } else {
+      this.currentIndex--
+      }
+      this.updateChart()
+    },
+    toRight () {
+      if (this.currentIndex === this.allData.length - 1) {
+        this.currentIndex = 0
+      } else {
+        this.currentIndex++
+      }
+      this.updateChart()
     }
   }
 }
 </script>
 
 <style scoped>
-
+.arr-left {
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+.arr-right {
+  position: absolute;
+  top: 50%;
+  right: 10%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+.cat-name {
+  position: absolute;
+  bottom: 10%;
+  right: 10%;
+}
 </style>
