@@ -38,9 +38,50 @@ export default {
     initChart () {
       this.chartInstance = this.$echarts.init(this.$refs.hot_ref, 'chalk')
       const initOption = {
+        title: {
+          text: '▍热销商品占比',
+          top: 20,
+          left: 20
+        },
+        legend: {
+          top: 20,
+          icon: 'circle'
+        },
+        tooltip: {
+          formatter: arg => {
+            const thirdCategory = arg.data.children
+            // console.log(thirdCategory)
+            let total = 0
+            thirdCategory.forEach(item => {
+              total += item.value
+            })
+            let retStr = ''
+            thirdCategory.forEach(item => {
+              retStr += `
+              ${item.name}:${parseInt(item.value / total * 100) + '%'}
+              <br/>
+              `
+            })
+            return retStr
+          }
+        },
         series: [
           {
-            type: 'pie'
+            type: 'pie',
+            label: {
+              show: false
+            },
+            labelLine: {
+              show: false
+            },
+            emphasis: {
+              label: {
+                show: true
+              },
+              labelLine: {
+                show: false
+              }
+            }
           }
         ]
       }
@@ -48,7 +89,7 @@ export default {
     },
     async getData () {
       const { data: res } = await this.$http.get('hotproduct')
-      console.log(res)
+      // console.log(res)
       this.allData = res
       this.updateChart()
     },
@@ -59,7 +100,8 @@ export default {
       const seriesData = this.allData[this.currentIndex].children.map(item => {
         return {
           name: item.name,
-          value: item.value
+          value: item.value,
+          children: item.children
         }
       })
       const dataOption = {
@@ -98,6 +140,9 @@ export default {
 </script>
 
 <style scoped>
+span {
+  color: aliceblue;
+}
 .arr-left {
   position: absolute;
   top: 50%;
