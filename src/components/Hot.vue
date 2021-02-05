@@ -1,9 +1,9 @@
 <template>
  <div class="com-container">
    <div class="com-chart" ref="hot_ref"></div>
-   <span class="iconfont arr-left" @click="toLeft">&#xe6ef;</span>
-   <span class="iconfont arr-right" @click="toRight">&#xe6ed;</span>
-   <span class="cat-name">{{ catName }}</span>
+   <span class="iconfont arr-left" @click="toLeft" :style="catStyle">&#xe6ef;</span>
+   <span class="iconfont arr-right" @click="toRight" :style="catStyle">&#xe6ed;</span>
+   <span class="cat-name" :style="catStyle">{{ catName }}</span>
  </div>
 </template>
 
@@ -16,7 +16,8 @@ export default {
     return {
       chartInstance: null,
       allData: null,
-      currentIndex: 0
+      currentIndex: 0,
+      titleFontSize: 0
     }
   },
   computed: {
@@ -26,6 +27,11 @@ export default {
       } else {
         return this.allData[this.currentIndex].name
       }
+    },
+    catStyle () {
+      return {
+        fontSize: this.titleFontSize + 'px'
+      }
     }
   },
   watch: {},
@@ -33,6 +39,10 @@ export default {
   mounted () {
     this.initChart()
     this.getData()
+    window.addEventListener('resize', this.screenAdapter)
+  },
+  destroyed () {
+    window.removeEventListener('resize', this.screenAdapter)
   },
   methods: {
     initChart () {
@@ -44,7 +54,7 @@ export default {
           left: 20
         },
         legend: {
-          top: 20,
+          top: '15%',
           icon: 'circle'
         },
         tooltip: {
@@ -86,6 +96,7 @@ export default {
         ]
       }
       this.chartInstance.setOption(initOption)
+      this.screenAdapter()
     },
     async getData () {
       const { data: res } = await this.$http.get('hotproduct')
@@ -106,7 +117,7 @@ export default {
       })
       const dataOption = {
         legend: {
-          name:legendData
+          name: legendData
         },
         series: [
           {
@@ -117,7 +128,33 @@ export default {
       this.chartInstance.setOption(dataOption)
     },
     screenAdapter () {
-
+      this.titleFontSize = this.$refs.hot_ref.offsetWidth / 100 * 3.6
+      const adapterOption = {
+        title: {
+          textStyle: {
+            fontSize: this.titleFontSize
+          }
+        },
+        legend: {
+          itemWidth: this.titleFontSize / 2,
+          itemHeight: this.titleFontSize / 2,
+          itemGap: this.titleFontSize / 2,
+          textStyle: {
+            fontSize: this.titleFontSize / 2
+          }
+        },
+        series: [
+          {
+            radius: this.titleFontSize * 4.5,
+            center: ['50%', '60%'],
+            label: {
+              fontSize: this.titleFontSize
+            }
+          }
+        ]
+      }
+      this.chartInstance.setOption(adapterOption)
+      this.chartInstance.resize()
     },
     toLeft () {
       if (this.currentIndex === 0) {

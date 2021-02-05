@@ -28,6 +28,7 @@ export default {
   },
   destroyed () {
     clearInterval(this.timerId)
+    window.removeEventListener('resize', this.screenAdapter)
   },
   methods: {
     initChart () {
